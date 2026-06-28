@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PurePulse One - Business Card</title>
+    <!-- Using Inter for a clean, tech-forward, readable sans-serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- html2canvas for downloading the card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            /* Deep, matte charcoal/black base */
+            --bg-color: #0a0a0c;
+            --card-bg: #121214;
+            
+            /* Chrome/Silver gradients */
+            --chrome-light: #f5f5f7;
+            --chrome-mid: #a0a0a5;
+            --chrome-dark: #4a4a50;
+            
+            --chrome-gradient: linear-gradient(
+                135deg, 
+                var(--chrome-light) 0%, 
+                var(--chrome-mid) 45%, 
+                var(--chrome-dark) 50%, 
+                var(--chrome-mid) 55%, 
+                var(--chrome-light) 100%
+            );
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Utility buttons for downloading */
+        .export-controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .export-controls button {
+            background: linear-gradient(135deg, #1a1a1c 0%, #2a2a2e 100%);
+            color: var(--chrome-light);
+            border: 1px solid var(--chrome-dark);
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .export-controls button:hover {
+            background: var(--chrome-gradient);
+            color: var(--bg-color);
+            border-color: transparent;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        /* Standard US Business Card dimensions (3.5" x 2") scaled up for screen */
+        .card {
+            width: 1050px;
+            height: 600px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            box-sizing: border-box;
+        }
+
+        /* Subtle noise texture to make it feel like premium matte cardstock */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- FRONT OF CARD --- */
+        .card-front {
+            display: flex;
+            justify-content: space-between;
+            padding: 60px;
+        }
+
+        .person-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .name {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 0 0 5px 0;
+            background: var(--chrome-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .title {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--chrome-mid);
+            margin: 0 0 50px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .contact-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-line {
+            display: flex;
+            align-items: center;
+            color: #d0d0d5;
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-line span {
+            display: inline-block;
+            width: 24px;
+            font-weight: 600;
+            color: var(--chrome-dark);
+            margin-right: 15px;
+        }
+
+        .company-anchor {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            z-index: 2;
+        }
+
+        .company-name-small {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: var(--chrome-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .company-domain {
+            font-size: 0.9rem;
+            color: var(--chrome-dark);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        /* --- BACK OF CARD --- */
+        .card-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative; /* Crucial for absolute positioning of the QR code */
+        }
+
+        /* Minimalist Logo Mark (CSS Generated) */
+        .logo-mark {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-mark::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%; height: 100%;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            background: var(--chrome-gradient) border-box;
+            -webkit-mask:
+                linear-gradient(#fff 0 0) padding-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+        }
+
+        /* The "Pulse" line */
+        .pulse-line {
+            position: absolute;
+            top: 50%; left: 10%;
+            width: 80%; height: 3px;
+            background: var(--chrome-gradient);
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .pulse-line::after {
+            content: '';
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; height: 12px;
+            background: var(--chrome-light);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .company-name-large {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: var(--chrome-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 2;
+            text-transform: uppercase;
+        }
+
+        /* Subtle architectural lines */
+        .grid-line {
+            position: absolute;
+            background: rgba(255,255,255,0.03);
+            z-index: 0;
+        }
+        
+        .card-back .grid-line-1 { top: 0; left: 50%; width: 1px; height: 100%; }
+        .card-back .grid-line-2 { top: 50%; left: 0; width: 100%; height: 1px; }
+        
+        /* QR Code Container Style */
+        .qr-container {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            width: 100px;
+            height: 100px;
+            background-color: #ffffff;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Controls for rendering the card to PNG -->
+    <div class="export-controls" data-html2canvas-ignore="true">
+        <button onclick="downloadCard('.card-front', 'PurePulse_Matty_Hagen_Front.png')">Download Front</button>
+        <button onclick="downloadCard('.card-back', 'PurePulse_Matty_Hagen_Back.png')">Download Back</button>
+    </div>
+
+    <div class="card-container">
+        
+        <!-- FRONT OF CARD -->
+        <div class="card card-front">
+            <!-- Left Side: Individual Details -->
+            <div class="person-details">
+                <h1 class="name">Matty Hagen</h1>
+                <h2 class="title">Senior Software Engineer</h2>
+                
+                <div class="contact-lines">
+                    <div class="contact-line"><span>T</span> 402.915.1434</div>
+                    <div class="contact-line"><span>E</span> contact@purepulse.one</div>
+                    <div class="contact-line"><span>A</span> Omaha, NE</div>
+                </div>
+            </div>
+
+            <!-- Right Side: Company Anchor -->
+            <div class="company-anchor">
+                <div class="company-name-small">PurePulse</div>
+                <div class="company-domain">PUREPULSE.ONE</div>
+            </div>
+        </div>
+
+        <!-- BACK OF CARD -->
+        <div class="card card-back">
+            <div class="grid-line grid-line-1"></div>
+            <div class="grid-line grid-line-2"></div>
+            
+            <div class="logo-mark">
+                <div class="pulse-line"></div>
+            </div>
+            
+            <div class="company-name-large">PurePulse</div>
+
+            <!-- Pre-rendered QR Code Container (Top Right of Back Card) -->
+            <div class="qr-container">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://purepulse.one/&margin=0" alt="PurePulse.one QR Code" crossorigin="anonymous">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Utility to convert a specific DOM node into a high-res PNG for printing
+         */
+        async function downloadCard(selector, filename) {
+            const element = document.querySelector(selector);
+            if (!element) return;
+            
+            const originalBoxShadow = element.style.boxShadow;
+            
+            try {
+                // Temporarily remove heavy shadows before export for cleaner print edges
+                element.style.boxShadow = 'none';
+
+                const canvas = await html2canvas(element, {
+                    scale: 4, // 4x scale yields a ~4200x2400px image, great for crisp 300dpi printing
+                    useCORS: true, // Required to capture the external API QR code
+                    backgroundColor: '#121214', // Match the card background exactly
+                    logging: false
+                });
+                
+                // Create an invisible anchor tag to trigger the file download
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (err) {
+                console.error("Error generating image asset:", err);
+                alert("Could not generate image. If the QR code failed to load, try refreshing the page.");
+            } finally {
+                // Restore original styles
+                element.style.boxShadow = originalBoxShadow;
+            }
+        }
+    </script>
+</body>
+</html>
